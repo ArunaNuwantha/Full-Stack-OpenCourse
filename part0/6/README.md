@@ -9,7 +9,7 @@ sequenceDiagram
     Browser->>+SPA: Request single-page app version
     SPA->>+Browser: Serve single-page app version
     Browser->>+SPA: Load single-page app version
-    User->>+SPA: Click "New Note" button
+    User->>+SPA: Click "save" button
     SPA->>+API: Send POST request with new note data
     API->>+SPA: Return a Response
     SPA->>+Browser: Display new note
