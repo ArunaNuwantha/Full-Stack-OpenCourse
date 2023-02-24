@@ -13,7 +13,9 @@ morgan.token('data', function (req, res) {
     return " ";
 })
 
-app.use(morgan(":method :url :status :res[content-length] - :response-time ms :data"))
+app.use(morgan(":method :url :status :res[content-length] - :response-time ms :data"));
+
+app.use(express.static('build'))
 
 let phonebooks = [
     {
