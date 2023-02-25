@@ -21,11 +21,11 @@ const recordSchema = new mongoose.Schema({
 const Record = mongoose.model('Record', recordSchema);
 
 if (process.argv.length === 3) {
-
+    console.log("phonebook:");
     Record
         .find({})
         .then((data) => {
-            console.log(data);
+            data.map(p => console.log(`${p.name} ${p.number}`))
         })
         .catch(err => console.log(err));
 }
