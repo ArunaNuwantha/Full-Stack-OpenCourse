@@ -61,7 +61,6 @@ app.get('/info', (req, res) => {
 });
 
 app.get('/api/persons/:id', (req, res) => {
-    const id = Number(req.params.id);
     const person = phonebooks.find((p) => p.id == id);
     // console.log(person);
     if (person !== undefined) {
@@ -90,15 +89,17 @@ app.post('/api/persons', (req, res) => {
         return res.status(404).send({ error: "name and number are required" })
     }
     const { name, number } = req.body;
-    const person = phonebooks.find((p) => p.name === name);
-    if (person) {
-        return res.status(404).send({ error: "name must be unique" }).end();
-    }
+    Person.findOne({ name: name }).then((data) => {
+        if (data) {
+            res.status(404).send({ error: "name must be unique" }).end();
+        }
+    });
 
-    const id = Math.round(Math.random() * 100);
-    const data = { id, name, number }
-    phonebooks.push(data);
-    res.status(201).send(data);
+    const newPerson = new Person({ name, number })
+    newPerson.save().then(((data) => {
+        res.status(201).json(data);
+    }))
+        .catch(err => console.log(err));
 
 })
 
