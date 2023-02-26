@@ -2,22 +2,22 @@ require('dotenv').config();
 const express = require('express');
 const morgan = require('morgan');
 const cors = require('cors');
-const { Person } = require('./models/Person')
+const { Person } = require('./models/Person');
 
 const app = express();
 app.use(express.json());
-app.use(cors())
+app.use(cors());
 
-morgan.token('data', function (req, res) {
+morgan.token('data', function (req) {
     if (req.method === 'POST') {
         return JSON.stringify(req.body);
     }
-    return " ";
-})
+    return '';
+});
 
-app.use(morgan(":method :url :status :res[content-length] - :response-time ms :data"));
+app.use(morgan(':method :url :status :res[content-length] - :response-time ms :data'));
 
-app.use(express.static('build'))
+app.use(express.static('build'));
 
 const errorHandler = (error, req, res, next) => {
     console.error(error.name);
@@ -26,7 +26,7 @@ const errorHandler = (error, req, res, next) => {
     }
     next(error);
 
-}
+};
 
 
 
@@ -36,15 +36,17 @@ app.get('/api/persons', (req, res, next) => {
         .then((data) => {
             res.status(200).json(data);
         })
-        .catch(err => console.log(err));
+        .catch(err => next(err));
 });
 
-app.get('/info', (req, res) => {
-    const HTML = `
-    <p>Phonebook has info for ${phonebooks.length} people</p>
-    ${new Date()}
-    `;
-    res.status(200).send(HTML);
+app.get('/info', (req, res, next) => {
+    Person.find({}).then((data) => {
+        const HTML = `
+        <p>Phonebook has info for ${data.length} people</p>
+        ${new Date()}
+        `;
+        res.status(200).send(HTML);
+    }).catch(err => next(err));
 
 });
 
@@ -66,16 +68,16 @@ app.get('/api/persons/:id', (req, res, next) => {
 app.post('/api/persons', (req, res, next) => {
     // console.log(req.body);
     if (req.body.name === undefined || req.body.number === undefined) {
-        return res.status(404).send({ error: "name and number are required" })
+        return res.status(404).send({ error: 'name and number are required' });
     }
     const { name, number } = req.body;
     Person.findOne({ name: name }).then((data) => {
         if (data) {
-            return res.status(404).json({ error: "name must be unique" }).end();
+            return res.status(404).json({ error: 'name must be unique' }).end();
         }
     });
 
-    const newPerson = new Person({ name, number })
+    const newPerson = new Person({ name, number });
     newPerson.save()
         .then(((data) => {
             res.status(201).json(data);
@@ -89,14 +91,14 @@ app.post('/api/persons', (req, res, next) => {
 
 app.put('/api/persons/:id', (req, res, next) => {
     if (req.body.name === undefined || req.body.number === undefined) {
-        return res.status(404).send({ error: "name and number are required" })
+        return res.status(404).send({ error: 'name and number are required' });
     }
     const { name, number } = req.body;
     Person.findOneAndUpdate({ name: name }, { $set: { number: number } }).then((data) => {
         if (data) {
             return res.status(203).json(data);
         }
-    });
+    }).catch(err => next(err));
 
 });
 
@@ -110,16 +112,15 @@ app.delete('/api/persons/:id', (req, res, next) => {
             } else {
                 return res.status(404).send({ message: `id:${req.params.id} is not found.` });
             }
-        }).catch(err => {
-            next(err);
-        })
+        }).catch(err => next(err));
 });
 
 app.use(errorHandler);
 
 
+// eslint-disable-next-line no-undef
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`)
-})
+    console.log(`Server running on port ${PORT}`);
+});
 
