@@ -9,7 +9,6 @@ const App = () => {
   const [persons, setPersons] = useState([])
   const [newName, setNewName] = useState('')
   const [number, setNumber] = useState('')
-  const [currentId, setCurrentId] = useState(persons.length)
   const [delim, setDelim] = useState('')
   const [successMessage, setSuccessMessage] = useState(null);
   const [errorMessage, setErrorMessage] = useState(null);
@@ -18,7 +17,6 @@ const App = () => {
     personsService.getAll()
       .then(({ data }) => {
         setPersons(data);
-        setCurrentId(data.length);
       })
       .catch(err => console.log(err))
   }, [])
@@ -44,12 +42,12 @@ const App = () => {
         setPersons([...persons]);
       }
     } else {
-      const newData = { id: currentId + 1, name: newName, number: number };
-      setCurrentId(e => e + 1);
-      personsService.create(newData).then((newData) => {
-        console.log(newData);
-        setPersons([...persons, newData])
-        setSuccessMessage(`Added ${newName}`);
+      const newData = { name: newName, number: number };
+      personsService.create(newData).then((res) => {
+        // console.log(res);
+        // console.log(persons);
+        setPersons([...persons, res.data])
+        setSuccessMessage(`Added ${res.data.name}`);
         setTimeout(() => {
           setSuccessMessage(null);
         }, 2000);
