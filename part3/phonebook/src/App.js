@@ -40,17 +40,27 @@ const App = () => {
       if (window.confirm(`${newName} is already added to phonebook. replace the old number with a new one?`)) {
         const index = persons.findIndex((p) => p.name === newName);
         persons[index].number = number;
+        personsService.update(persons[index]);
         setPersons([...persons]);
       }
     } else {
       const newData = { id: currentId + 1, name: newName, number: number };
-      setPersons([...persons, newData])
       setCurrentId(e => e + 1);
-      personsService.create(newData);
-      setSuccessMessage(`Added ${newName}`);
-      setTimeout(() => {
-        setSuccessMessage(null);
-      }, 2000);
+      personsService.create(newData).then((newData) => {
+        console.log(newData);
+        setPersons([...persons, newData])
+        setSuccessMessage(`Added ${newName}`);
+        setTimeout(() => {
+          setSuccessMessage(null);
+        }, 2000);
+      }).catch(err => {
+        console.log(err.response.data);
+        setErrorMessage(err.response.data.message);
+        setTimeout(() => {
+          setErrorMessage(null);
+        }, 4000);
+
+      });
 
     }
   }
